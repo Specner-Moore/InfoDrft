@@ -3,9 +3,6 @@
 import { useState, useEffect } from 'react'
 import { createClientComponentClient } from '@/lib/supabase-client'
 
-// FORCE RELOAD - VERSION 2.0
-console.log('🔥🔥🔥 NEWS PAGE LOADED - VERSION 2.0 🔥🔥🔥')
-
 interface NewsArticle {
   title: string
   description: string
@@ -56,7 +53,6 @@ export default function NewsPage() {
           console.error('Error fetching interests:', error)
           setError('Failed to load interests from database')
         } else {
-          console.log('Fetched interests for user:', interests)
           setAvailableInterests(interests || [])
           // Automatically generate news if interests are available
           if (interests && interests.length > 0) {
@@ -85,8 +81,6 @@ export default function NewsPage() {
   }, [supabase]) // Add supabase to dependency array
 
   const generateNews = async (interests: string[]) => {
-    console.log('🔥🔥🔥 FUNCTION CALLED - generateNews 🔥🔥🔥')
-    console.log('🔥🔥🔥 INTERESTS:', interests)
     
     if (interests.length === 0) {
       setError('No interests available to generate news')
@@ -98,8 +92,6 @@ export default function NewsPage() {
     setArticles([]) // Clear previous articles
     
     try {
-      console.log('🚀 Making request to streaming API: /api/news/stream')
-      console.log('📡 URL being called:', '/api/news/stream')
       const response = await fetch('/api/news/stream', {
         method: 'POST',
         headers: {
@@ -136,17 +128,14 @@ export default function NewsPage() {
               const data = JSON.parse(line.slice(6))
               
               if (data.type === 'first-batch') {
-                console.log('Received first batch:', data.articles.length, 'articles')
                 setArticles(data.articles)
                 setIsLoadingMore(true) // Show loading for second batch
                 // Scroll to top after first batch
                 window.scrollTo({ top: 0, behavior: 'smooth' })
               } else if (data.type === 'second-batch') {
-                console.log('Received second batch:', data.articles.length, 'articles')
                 setArticles(prev => [...prev, ...data.articles])
                 setIsLoadingMore(false) // Hide loading for second batch
               } else if (data.type === 'complete') {
-                console.log('Streaming complete. Total articles:', data.totalArticles)
                 setIsLoadingMore(false)
               } else if (data.type === 'error') {
                 throw new Error(data.error)
