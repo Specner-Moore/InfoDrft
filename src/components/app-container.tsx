@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from 'react'
 import { createClientComponentClient } from '@/lib/supabase-client'
+import { User } from '@supabase/supabase-js'
 import { AuthForm } from './auth-form'
 import { InterestsTable } from './interests-table'
 import { AddInterestForm } from './add-interest-form'
 // Debug components removed for now
 
 export function AppContainer() {
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const supabase = createClientComponentClient()
 
@@ -38,14 +39,10 @@ export function AppContainer() {
     )
 
     return () => subscription.unsubscribe()
-  }, [supabase.auth])
+  }, [supabase])
 
   const handleAuthSuccess = () => {
     // This will be handled by the auth state change listener
-  }
-
-  const handleSignOut = () => {
-    setUser(null)
   }
 
   if (loading) {

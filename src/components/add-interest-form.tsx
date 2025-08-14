@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import { createClientComponentClient } from '@/lib/supabase-client'
+import { User } from '@supabase/supabase-js'
 
 export function AddInterestForm() {
   const [name, setName] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   
   // Create Supabase client once, outside of useEffect
   const supabase = createClientComponentClient()
@@ -18,7 +19,7 @@ export function AddInterestForm() {
       setUser(user)
     }
     getUser()
-  }, []) // Removed supabase.auth from dependencies
+  }, [supabase]) // Add supabase to dependencies
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

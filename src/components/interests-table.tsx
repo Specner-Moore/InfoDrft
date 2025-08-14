@@ -51,7 +51,7 @@ export function InterestsTable() {
     }
 
     fetchInterests()
-  }, []) // Removed supabase from dependencies since it's now stable
+  }, [supabase]) // Add supabase to dependencies
 
   if (loading) {
     return (

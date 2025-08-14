@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClientComponentClient } from '@/lib/supabase-client'
 import { useRouter } from 'next/navigation'
+import { User } from '@supabase/supabase-js'
 
 const SAMPLE_INTERESTS = [
   'Technology', 'Science', 'Business', 'Politics', 'Sports', 
@@ -12,7 +13,7 @@ const SAMPLE_INTERESTS = [
 ]
 
 export default function SetupPage() {
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [selectedInterests, setSelectedInterests] = useState<string[]>([])
   const [customInterest, setCustomInterest] = useState('')
   // Removed unused loading state
@@ -43,7 +44,7 @@ export default function SetupPage() {
       }
     }
     checkAuth()
-  }, [supabase.auth, router])
+  }, [supabase, router])
 
   const toggleInterest = (interest: string) => {
     setSelectedInterests(prev => 
@@ -81,7 +82,7 @@ export default function SetupPage() {
           .insert([
             { 
               name: interestName, 
-              user_id: user.id 
+              user_id: user?.id 
             }
           ])
         

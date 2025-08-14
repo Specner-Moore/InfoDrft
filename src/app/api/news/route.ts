@@ -1,8 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { fetchNewsFromNewsAPI } from '@/lib/newsapi'
-import { summarizeArticlesWithOpenAI } from '@/lib/openai'
+import { NextResponse } from 'next/server'
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   // Temporarily disabled - use /api/news/stream instead
   return NextResponse.json(
     { error: 'This endpoint is disabled. Please use /api/news/stream for streaming news.' },

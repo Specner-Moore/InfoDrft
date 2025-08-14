@@ -78,7 +78,7 @@ export function NewsPage() {
     return () => {
       isMounted = false
     }
-  }, [])
+  }, [supabase])
 
   const generateNews = async (interests: string[]) => {
     if (interests.length === 0) {

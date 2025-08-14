@@ -3,11 +3,12 @@
 import { useState, useEffect } from 'react'
 import { createClientComponentClient } from '@/lib/supabase-client'
 import { useRouter } from 'next/navigation'
+import { User } from '@supabase/supabase-js'
 import { AuthForm } from './auth-form'
 import { NewsPage } from './news-page'
 
 export function SimpleAuthWrapper() {
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [hasInterests, setHasInterests] = useState(false)
   
@@ -78,7 +79,7 @@ export function SimpleAuthWrapper() {
       mounted = false
       subscription.unsubscribe()
     }
-  }, [])
+  }, [supabase])
 
   // Handle redirect to setup page for new users
   useEffect(() => {
@@ -88,11 +89,6 @@ export function SimpleAuthWrapper() {
       router.push('/setup')
     }
   }, [user, hasInterests, loading, router])
-
-  const handleSignOut = () => {
-    setUser(null)
-    setHasInterests(false)
-  }
 
   // Show loading
   if (loading) {

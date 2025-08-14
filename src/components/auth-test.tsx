@@ -2,9 +2,18 @@
 
 import { useState, useEffect } from 'react'
 import { createClientComponentClient } from '@/lib/supabase-client'
+import { Session, User } from '@supabase/supabase-js'
+
+interface AuthState {
+  session?: Session | null
+  user?: User | null
+  sessionError?: string
+  userError?: string
+  error?: string
+}
 
 export function AuthTest() {
-  const [authState, setAuthState] = useState<any>({})
+  const [authState, setAuthState] = useState<AuthState>({})
   const [loading, setLoading] = useState(true)
   
   const supabase = createClientComponentClient()

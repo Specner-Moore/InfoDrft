@@ -3,11 +3,12 @@
 import { useState, useEffect } from 'react'
 import { createClientComponentClient } from '@/lib/supabase-client'
 import { useRouter } from 'next/navigation'
+import { User } from '@supabase/supabase-js'
 import { InterestsTable } from '@/components/interests-table'
 import { AddInterestForm } from '@/components/add-interest-form'
 
 export default function InterestsPage() {
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [authChecked, setAuthChecked] = useState(false)
   
@@ -76,7 +77,7 @@ export default function InterestsPage() {
       mounted = false
       subscription.unsubscribe()
     }
-  }, [authChecked])
+  }, [supabase, router, authChecked])
 
 
 

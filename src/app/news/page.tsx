@@ -82,7 +82,7 @@ export default function NewsPage() {
     return () => {
       isMounted = false
     }
-  }, []) // Remove supabase from dependency array
+  }, [supabase]) // Add supabase to dependency array
 
   const generateNews = async (interests: string[]) => {
     console.log('🔥🔥🔥 FUNCTION CALLED - generateNews 🔥🔥🔥')
