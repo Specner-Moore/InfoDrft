@@ -1,6 +1,6 @@
-import { NextResponse, type NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
 
-export async function middleware(request: NextRequest) {
+export async function middleware() {
   // For now, just pass through all requests without Supabase middleware
   // This prevents the 500 error while we debug the Supabase integration
   return NextResponse.next()

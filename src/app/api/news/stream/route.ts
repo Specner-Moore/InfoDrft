@@ -2,6 +2,9 @@ import { NextRequest } from 'next/server'
 import { fetchNewsFromNewsAPI } from '@/lib/newsapi'
 import { summarizeArticlesWithOpenAI } from '@/lib/openai'
 
+// Force dynamic rendering since this route uses request.url
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   const encoder = new TextEncoder()
   

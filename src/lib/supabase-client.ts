@@ -25,7 +25,7 @@ export const createClientComponentClient = (): SupabaseClient => {
           insert: () => Promise.resolve({ data: null, error: null }),
         }),
       }),
-    } as any as SupabaseClient
+    } as unknown as SupabaseClient
   }
   
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
