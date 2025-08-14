@@ -12,7 +12,6 @@ export function Navigation() {
   const [lastScrollY, setLastScrollY] = useState(0)
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const supabase = createClientComponentClient()
 
   const navItems = [
     { href: '/', label: 'News', icon: '📰' },
@@ -20,23 +19,32 @@ export function Navigation() {
   ]
 
   useEffect(() => {
-    // Get current user
-    const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      setUser(session?.user ?? null)
+    const initializeAuth = async () => {
+      try {
+        const supabase = createClientComponentClient()
+        // Get current user
+        const getSession = async () => {
+          const { data: { session } } = await supabase.auth.getSession()
+          setUser(session?.user ?? null)
+        }
+
+        getSession()
+
+        // Listen for auth changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+          (event, session) => {
+            setUser(session?.user ?? null)
+          }
+        )
+
+        return () => subscription.unsubscribe()
+      } catch (error) {
+        console.error('Error initializing auth:', error)
+      }
     }
 
-    getSession()
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setUser(session?.user ?? null)
-      }
-    )
-
-    return () => subscription.unsubscribe()
-  }, [supabase])
+    initializeAuth()
+  }, [])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -62,6 +70,7 @@ export function Navigation() {
   const handleSignOut = async () => {
     setIsLoading(true)
     try {
+      const supabase = createClientComponentClient()
       const { error } = await supabase.auth.signOut()
       
       if (error) {
