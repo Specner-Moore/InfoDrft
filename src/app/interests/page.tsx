@@ -7,6 +7,9 @@ import { User } from '@supabase/supabase-js'
 import { InterestsTable } from '@/components/interests-table'
 import { AddInterestForm } from '@/components/add-interest-form'
 
+// Force dynamic rendering to prevent SSR issues
+export const dynamic = 'force-dynamic'
+
 export default function InterestsPage() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)

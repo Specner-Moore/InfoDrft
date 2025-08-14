@@ -5,6 +5,12 @@ let supabaseClient: SupabaseClient | null = null
 
 // Client-side Supabase client (for use in client components)
 export const createClientComponentClient = (): SupabaseClient => {
+  // Check if we're in a browser environment
+  if (typeof window === 'undefined') {
+    // Server-side rendering - return a mock client or throw a more specific error
+    throw new Error('Supabase client cannot be created during server-side rendering')
+  }
+  
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
     throw new Error('Supabase environment variables are not configured')
   }

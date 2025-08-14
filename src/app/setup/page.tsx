@@ -5,6 +5,9 @@ import { createClientComponentClient } from '@/lib/supabase-client'
 import { useRouter } from 'next/navigation'
 import { User } from '@supabase/supabase-js'
 
+// Force dynamic rendering to prevent SSR issues
+export const dynamic = 'force-dynamic'
+
 const SAMPLE_INTERESTS = [
   'Technology', 'Science', 'Business', 'Politics', 'Sports', 
   'Entertainment', 'Health', 'Education', 'Environment', 'Travel',
@@ -20,31 +23,37 @@ export default function SetupPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   
-  const supabase = createClientComponentClient()
   const router = useRouter()
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session?.user) {
-        router.push('/')
-        return
-      }
-      setUser(session.user)
-      
-      // Check if user already has interests - if they do, redirect to main page
-      const { data: interests, error } = await supabase
-        .from('interests')
-        .select('id')
-        .eq('user_id', session.user.id)
-        .limit(1)
-      
-      if (!error && interests && interests.length > 0) {
+      try {
+        const supabase = createClientComponentClient()
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!session?.user) {
+          router.push('/')
+          return
+        }
+        setUser(session.user)
+        
+        // Check if user already has interests - if they do, redirect to main page
+        const { data: interests, error } = await supabase
+          .from('interests')
+          .select('id')
+          .eq('user_id', session.user.id)
+          .limit(1)
+        
+        if (!error && interests && interests.length > 0) {
+          router.push('/')
+        }
+      } catch (error) {
+        console.error('Error checking auth:', error)
+        // If there's an error with Supabase, redirect to home
         router.push('/')
       }
     }
     checkAuth()
-  }, [supabase, router])
+  }, [router])
 
   const toggleInterest = (interest: string) => {
     setSelectedInterests(prev => 
@@ -75,6 +84,7 @@ export default function SetupPage() {
     setMessage(null)
 
     try {
+      const supabase = createClientComponentClient()
       // Add each selected interest to the database
       for (const interestName of selectedInterests) {
         const { error } = await supabase
