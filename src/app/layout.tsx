@@ -9,37 +9,18 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'AI Project',
-  description: 'Next.js project with Supabase integration',
+  title: 'InfoDrft',
+  description: 'A news application that uses AI to filter news articles based on your interests.',
   keywords: ['Next.js', 'React', 'TypeScript', 'Supabase'],
-  authors: [{ name: 'Your Name' }],
-  creator: 'Your Name',
+  authors: [{ name: 'Spencer Moore' }],
+  creator: 'Spencer Moore',
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://your-domain.com',
-    title: 'AI Project',
-    description: 'Next.js project with Supabase integration',
-    siteName: 'AI Project',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'AI Project',
-    description: 'Next.js project with Supabase integration',
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
-  verification: {
-    google: 'your-google-verification-code',
+    url: 'https://infodrft.com',
+    title: 'InfoDrft',
+    description: 'A news application that uses AI to filter news articles based on your interests.',
+    siteName: 'InfoDrft',
   },
 }
 
