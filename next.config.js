@@ -4,6 +4,8 @@
 console.log('=== ENVIRONMENT VARIABLES DEBUG ===')
 console.log('NODE_ENV:', process.env.NODE_ENV)
 console.log('All process.env keys:', Object.keys(process.env))
+console.log('SUPABASE_SERVICE_ROLE_KEY exists:', !!process.env.SUPABASE_SERVICE_ROLE_KEY)
+console.log('SUPABASE_SERVICE_ROLE_KEY length:', process.env.SUPABASE_SERVICE_ROLE_KEY?.length || 0)
 console.log('=== END ENVIRONMENT VARIABLES DEBUG ===')
 
 const nextConfig = {
@@ -13,6 +15,7 @@ const nextConfig = {
   },
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
   },
   webpack: (config, { dev, isServer }) => {
     // Optimize webpack cache for better performance
