@@ -1,57 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { createClientComponentClient } from '@/lib/supabase-client'
+import { useInterests } from './interests-context'
 import { DeleteInterestButton } from './delete-interest-button'
 
-interface Interest {
-  id: number
-  name: string
-  user_id: string
-  created_at: string
-}
-
 export function InterestsTable() {
-  const [interests, setInterests] = useState<Interest[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  
-  // Create Supabase client once, outside of useEffect
-  const supabase = createClientComponentClient()
-
-  useEffect(() => {
-    const fetchInterests = async () => {
-      try {
-        // Get the current user
-        const { data: { user }, error: userError } = await supabase.auth.getUser()
-        
-        if (userError || !user) {
-          setError('Authentication required. Please sign in to view your interests.')
-          setLoading(false)
-          return
-        }
-        
-        // Fetch interests for the user
-        const { data: interestsData, error: interestsError } = await supabase
-          .from('interests')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('name', { ascending: true })
-
-        if (interestsError) {
-          setError(interestsError.message)
-        } else {
-          setInterests(interestsData || [])
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An unexpected error occurred')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchInterests()
-  }, [supabase]) // Add supabase to dependencies
+  const { interests, loading, error } = useInterests()
 
   if (loading) {
     return (
@@ -91,7 +44,7 @@ export function InterestsTable() {
     <div className="mt-8 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
       <h3 className="text-lg font-semibold mb-4">Interests</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {interests.map((interest: Interest) => (
+        {interests.map((interest) => (
           <div 
             key={interest.id} 
             className="flex items-center justify-between p-6 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors min-h-[80px]"

@@ -48,7 +48,7 @@ export async function summarizeArticlesWithOpenAI({ articles }: SummarizeRequest
           Article Description: ${article.description}
           Category: ${article.category}
           
-          Please respond with ONLY the summary text, no additional formatting or explanations.
+          Summary:
         `
 
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -58,19 +58,19 @@ export async function summarizeArticlesWithOpenAI({ articles }: SummarizeRequest
             'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
           },
           body: JSON.stringify({
-            model: 'gpt-4o-mini',
+            model: 'gpt-4o',
             messages: [
               {
                 role: 'system',
-                content: 'You are a helpful assistant that creates concise, engaging summaries of news articles. Always respond with only the summary text.'
+                content: 'You are a helpful assistant that creates concise, engaging summaries of news articles. Provide clear, informative summaries.'
               },
               {
                 role: 'user',
                 content: prompt
               }
             ],
-            temperature: 0.7,
             max_tokens: 150,
+            temperature: 0.7,
           }),
         })
 
@@ -86,6 +86,12 @@ export async function summarizeArticlesWithOpenAI({ articles }: SummarizeRequest
         // Validate summary is not an error message
         if (summary.toLowerCase().includes('apologies') || summary.toLowerCase().includes('couldn\'t find')) {
           throw new Error('OpenAI returned an error message instead of summary')
+        }
+
+        // Check if summary is too short or empty
+        if (!summary || summary.length < 10) {
+          console.warn('Summary too short or empty for article:', article.title)
+          throw new Error('Summary too short or empty')
         }
 
         summarizedArticles.push({

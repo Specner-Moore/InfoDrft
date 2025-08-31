@@ -6,15 +6,17 @@ import { useRouter } from 'next/navigation'
 import { User } from '@supabase/supabase-js'
 import { InterestsTable } from '@/components/interests-table'
 import { AddInterestForm } from '@/components/add-interest-form'
+import { InterestsProvider, useInterests } from '@/components/interests-context'
 
 // Force dynamic rendering to prevent SSR issues
 export const dynamic = 'force-dynamic'
 
-export default function InterestsPage() {
+function InterestsContent() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [authChecked, setAuthChecked] = useState(false)
   
+  const { interests, loading: interestsLoading } = useInterests()
   const supabase = createClientComponentClient()
   const router = useRouter()
 
@@ -33,20 +35,6 @@ export default function InterestsPage() {
           } else {
             console.log('Session result:', session ? 'Found' : 'None')
             setUser(session?.user ?? null)
-            
-            // Check if user has interests - if not, redirect to setup
-            if (session?.user) {
-              const { data: interests, error: interestsError } = await supabase
-                .from('interests')
-                .select('id')
-                .eq('user_id', session.user.id)
-                .limit(1)
-              
-              if (!interestsError && interests && interests.length === 0) {
-                router.push('/setup')
-                return
-              }
-            }
           }
           setAuthChecked(true)
           setLoading(false)
@@ -80,11 +68,18 @@ export default function InterestsPage() {
       mounted = false
       subscription.unsubscribe()
     }
-  }, [supabase, router, authChecked])
+  }, [supabase, authChecked])
 
+  // Check if user has interests - only redirect when we're certain they have none
+  useEffect(() => {
+    if (authChecked && user && !interestsLoading && interests.length === 0) {
+      console.log('User has no interests, redirecting to setup')
+      router.push('/setup')
+    }
+  }, [authChecked, user, interestsLoading, interests.length, router])
 
-
-  if (loading && !authChecked) {
+  // Show loading while checking auth or interests
+  if (loading || interestsLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
@@ -129,5 +124,13 @@ export default function InterestsPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function InterestsPage() {
+  return (
+    <InterestsProvider>
+      <InterestsContent />
+    </InterestsProvider>
   )
 } 

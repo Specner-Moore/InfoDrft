@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { createClientComponentClient } from '@/lib/supabase-client'
+import { useInterests } from './interests-context'
 
 interface DeleteInterestButtonProps {
   interestId: number
@@ -13,7 +13,7 @@ export function DeleteInterestButton({ interestId, interestName, totalInterests 
   const [isDeleting, setIsDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
-  const supabase = createClientComponentClient()
+  const { deleteInterest } = useInterests()
 
   const handleDelete = async () => {
     if (totalInterests <= 1) {
@@ -25,16 +25,10 @@ export function DeleteInterestButton({ interestId, interestName, totalInterests 
     setError(null)
 
     try {
-      const { error } = await supabase
-        .from('interests')
-        .delete()
-        .eq('id', interestId)
-
-      if (error) {
-        setError(error.message)
-      } else {
-        // Refresh the page to show updated data
-        window.location.reload()
+      const result = await deleteInterest(interestId)
+      
+      if (!result.success) {
+        setError(result.error || 'Failed to delete interest')
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unexpected error occurred')

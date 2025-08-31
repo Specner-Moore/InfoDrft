@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClientComponentClient } from '@/lib/supabase-client'
 import { User } from '@supabase/supabase-js'
+import { useInterests } from './interests-context'
 
 export function AddInterestForm() {
   const [name, setName] = useState('')
@@ -10,7 +11,7 @@ export function AddInterestForm() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [user, setUser] = useState<User | null>(null)
   
-  // Create Supabase client once, outside of useEffect
+  const { addInterest } = useInterests()
   const supabase = createClientComponentClient()
 
   useEffect(() => {
@@ -19,7 +20,7 @@ export function AddInterestForm() {
       setUser(user)
     }
     getUser()
-  }, [supabase]) // Add supabase to dependencies
+  }, [supabase])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -33,28 +34,13 @@ export function AddInterestForm() {
     }
 
     try {
-      console.log('Attempting to insert interest:', { name: name.trim(), user_id: user.id })
+      const result = await addInterest(name.trim())
       
-      const { data, error } = await supabase
-        .from('interests')
-        .insert([
-          {
-            name: name.trim(),
-            user_id: user.id
-          }
-        ])
-        .select()
-
-      console.log('Insert result:', { data, error })
-
-      if (error) {
-        console.error('Insert error:', error)
-        setMessage({ type: 'error', text: `Database error: ${error.message}` })
-      } else {
+      if (result.success) {
         setMessage({ type: 'success', text: 'Interest added successfully!' })
         setName('')
-        // Refresh the page to show the new data
-        window.location.reload()
+      } else {
+        setMessage({ type: 'error', text: result.error || 'Failed to add interest' })
       }
     } catch (error) {
       setMessage({ 
@@ -82,20 +68,20 @@ export function AddInterestForm() {
       <h3 className="text-lg font-semibold mb-4">Add New Interest</h3>
       
       <form onSubmit={handleSubmit} className="space-y-4">
-                 <div>
-           <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-             Interest Name *
-           </label>
-           <input
-             type="text"
-             id="name"
-             value={name}
-             onChange={(e) => setName(e.target.value)}
-             required
-             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
-             placeholder="e.g., Programming, Cooking, Travel"
-           />
-         </div>
+        <div>
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Interest Name *
+          </label>
+          <input
+            type="text"
+            id="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
+            placeholder="e.g., Programming, Cooking, Travel"
+          />
+        </div>
         
         <button
           type="submit"

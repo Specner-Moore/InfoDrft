@@ -25,6 +25,8 @@ export default function NewsPage() {
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [articles, setArticles] = useState<NewsArticle[]>([])
   const [error, setError] = useState<string | null>(null)
+  const [isCached, setIsCached] = useState(false)
+  const [isInitializing, setIsInitializing] = useState(true)
 
   const supabase = createClientComponentClient()
 
@@ -40,6 +42,7 @@ export default function NewsPage() {
         if (userError || !user) {
           if (!isMounted) return
           setError('Please sign in to view personalized news')
+          setIsInitializing(false)
           return
         }
 
@@ -55,24 +58,23 @@ export default function NewsPage() {
         if (error) {
           console.error('Error fetching interests:', error)
           setError('Failed to load interests from database')
+          setIsInitializing(false)
         } else {
           setAvailableInterests(interests || [])
           // Automatically generate news if interests are available
           if (interests && interests.length > 0) {
-            generateNews(interests.map(interest => interest.name))
+            generateNews(interests.map(interest => interest.name), user.id, false)
           } else {
             // Redirect to setup if no interests found
             window.location.href = '/setup'
           }
+          setIsInitializing(false)
         }
       } catch (err) {
         if (!isMounted) return
         console.error('Error fetching interests:', err)
         setError('Failed to load interests from database')
-      } finally {
-        if (!isMounted) {
-          // Loading complete
-        }
+        setIsInitializing(false)
       }
     }
 
@@ -83,7 +85,7 @@ export default function NewsPage() {
     }
   }, [supabase]) // Add supabase to dependency array
 
-  const generateNews = async (interests: string[]) => {
+  const generateNews = async (interests: string[], userId: string, forceRefresh: boolean = false) => {
     
     if (interests.length === 0) {
       setError('No interests available to generate news')
@@ -93,6 +95,7 @@ export default function NewsPage() {
     setIsLoading(true)
     setError(null)
     setArticles([]) // Clear previous articles
+    setIsCached(false)
     
     try {
       const response = await fetch('/api/news/stream', {
@@ -102,6 +105,8 @@ export default function NewsPage() {
         },
         body: JSON.stringify({
           interests: interests,
+          userId: userId,
+          forceRefresh: forceRefresh
         }),
       })
 
@@ -130,16 +135,27 @@ export default function NewsPage() {
             try {
               const data = JSON.parse(line.slice(6))
               
-              if (data.type === 'first-batch') {
+              if (data.type === 'cached') {
                 setArticles(data.articles)
-                setIsLoadingMore(true) // Show loading for second batch
-                // Scroll to top after first batch
+                setIsCached(true)
+                setIsLoading(false)
+                return // Exit early for cached articles
+              } else if (data.type === 'first-article') {
+                setIsLoadingMore(true) // Show loading for remaining articles
+                // Scroll to top after first article
                 window.scrollTo({ top: 0, behavior: 'smooth' })
-              } else if (data.type === 'second-batch') {
-                setArticles(prev => [...prev, ...data.articles])
-                setIsLoadingMore(false) // Hide loading for second batch
+              } else if (data.type === 'article') {
+                setArticles(prev => {
+                  const newArticles = [...prev, data.article]
+                  // Hide loading after first few articles
+                  if (newArticles.length >= 3) {
+                    setIsLoadingMore(false)
+                  }
+                  return newArticles
+                })
               } else if (data.type === 'complete') {
                 setIsLoadingMore(false)
+                setIsCached(data.cached || false)
               } else if (data.type === 'error') {
                 throw new Error(data.error)
               }
@@ -155,6 +171,29 @@ export default function NewsPage() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleGetMoreNews = async (interests: string[]) => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      generateNews(interests, user.id, true) // Force refresh
+    }
+  }
+
+  // Show loading screen while checking interests
+  if (isInitializing) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center p-8">
+        <div className="max-w-4xl mx-auto w-full">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 border border-gray-200 dark:border-gray-700">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600 dark:text-gray-400">Checking your interests...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -209,6 +248,15 @@ export default function NewsPage() {
              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
                News Based on Your Interests
              </h2>
+             
+             {/* Cache Status Indicator */}
+             {isCached && (
+               <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
+                 <p className="text-sm text-blue-700 dark:text-blue-300">
+                   📋 Showing cached articles from today. Click "Get More Articles" below to refresh.
+                 </p>
+               </div>
+             )}
             
             {isLoading ? (
               <div className="space-y-6">
@@ -282,13 +330,13 @@ export default function NewsPage() {
                 Get More Articles
               </h2>
               <p className="text-gray-600 dark:text-gray-400 mb-6 text-center">
-                Click on an interest below to get 10 more articles focused on that topic, or choose &quot;All Interests&quot; for a broader selection.
+                Click on an interest below to get fresh articles focused on that topic, or choose "All Interests" for a broader selection. This will refresh the cache with new articles.
               </p>
               
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
                 {/* All Interests Button */}
                 <button
-                  onClick={() => generateNews(availableInterests.map(interest => interest.name))}
+                  onClick={() => handleGetMoreNews(availableInterests.map(interest => interest.name))}
                   disabled={isLoading}
                   className="p-4 rounded-lg border-2 border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                 >
@@ -299,7 +347,7 @@ export default function NewsPage() {
                 {availableInterests.map((interest) => (
                   <button
                     key={interest.id}
-                    onClick={() => generateNews([interest.name])}
+                    onClick={() => handleGetMoreNews([interest.name])}
                     disabled={isLoading}
                     className="p-4 rounded-lg border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                   >

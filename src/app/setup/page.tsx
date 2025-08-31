@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClientComponentClient } from '@/lib/supabase-client'
 import { useRouter } from 'next/navigation'
 import { User } from '@supabase/supabase-js'
+import { InterestsProvider, useInterests } from '@/components/interests-context'
 
 // Force dynamic rendering to prevent SSR issues
 export const dynamic = 'force-dynamic'
@@ -15,14 +16,14 @@ const SAMPLE_INTERESTS = [
   'Finance', 'Automotive', 'Fashion'
 ]
 
-export default function SetupPage() {
+function SetupContent() {
   const [user, setUser] = useState<User | null>(null)
   const [selectedInterests, setSelectedInterests] = useState<string[]>([])
   const [customInterest, setCustomInterest] = useState('')
-  // Removed unused loading state
   const [isSaving, setIsSaving] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   
+  const { interests, loading: interestsLoading, addInterest } = useInterests()
   const router = useRouter()
 
   useEffect(() => {
@@ -35,17 +36,6 @@ export default function SetupPage() {
           return
         }
         setUser(session.user)
-        
-        // Check if user already has interests - if they do, redirect to main page
-        const { data: interests, error } = await supabase
-          .from('interests')
-          .select('id')
-          .eq('user_id', session.user.id)
-          .limit(1)
-        
-        if (!error && interests && interests.length > 0) {
-          router.push('/')
-        }
       } catch (error) {
         console.error('Error checking auth:', error)
         // If there's an error with Supabase, redirect to home
@@ -54,6 +44,14 @@ export default function SetupPage() {
     }
     checkAuth()
   }, [router])
+
+  // Check if user already has interests - only redirect when we're certain they have some
+  useEffect(() => {
+    if (user && !interestsLoading && interests.length > 0) {
+      console.log('User already has interests, redirecting to main page')
+      router.push('/')
+    }
+  }, [user, interestsLoading, interests.length, router])
 
   const toggleInterest = (interest: string) => {
     setSelectedInterests(prev => 
@@ -84,20 +82,13 @@ export default function SetupPage() {
     setMessage(null)
 
     try {
-      const supabase = createClientComponentClient()
-      // Add each selected interest to the database
+      // Add each selected interest using the context
       for (const interestName of selectedInterests) {
-        const { error } = await supabase
-          .from('interests')
-          .insert([
-            { 
-              name: interestName, 
-              user_id: user?.id 
-            }
-          ])
-        
-        if (error) {
-          console.error('Error adding interest:', error)
+        const result = await addInterest(interestName)
+        if (!result.success) {
+          setMessage({ type: 'error', text: result.error || 'Failed to save some interests. Please try again.' })
+          setIsSaving(false)
+          return
         }
       }
 
@@ -118,9 +109,8 @@ export default function SetupPage() {
     }
   }
 
-  // Remove the skip functionality - users must configure interests
-
-  if (!user) {
+  // Show loading while checking auth or interests
+  if (!user || interestsLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
@@ -136,7 +126,7 @@ export default function SetupPage() {
       <div className="max-w-4xl mx-auto w-full">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Welcome to InfoDrft! 🎉
+            Welcome to InfoDrft!
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-400 mb-2">
             Let&apos;s personalize your news experience
@@ -164,7 +154,7 @@ export default function SetupPage() {
                       onClick={() => removeInterest(interest)}
                       className="ml-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200"
                     >
-                      ×
+                      X
                     </button>
                   </span>
                 ))}
@@ -244,5 +234,13 @@ export default function SetupPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function SetupPage() {
+  return (
+    <InterestsProvider>
+      <SetupContent />
+    </InterestsProvider>
   )
 } 

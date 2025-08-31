@@ -51,11 +51,12 @@ export function Navigation() {
     const handleScroll = () => {
       const currentScrollY = window.scrollY
       
-      // Show navigation when scrolling up or at the top
-      if (currentScrollY < lastScrollY || currentScrollY < 100) {
+      // Always show navigation at the top of the page
+      if (currentScrollY <= 10) {
         setIsVisible(true)
       } else {
-        setIsVisible(false)
+        // Show navigation when scrolling up, hide when scrolling down
+        setIsVisible(currentScrollY < lastScrollY)
       }
       
       setLastScrollY(currentScrollY)
@@ -98,9 +99,14 @@ export function Navigation() {
     setIsMobileMenuOpen(false)
   }
 
+  // Don't render navigation if user is not signed in
+  if (!user) {
+    return null
+  }
+
   return (
     <>
-      <nav className={`fixed top-0 left-0 right-0 z-40 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm transition-transform duration-300 ${
+      <nav className={`fixed top-0 left-0 right-0 z-40 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm transition-transform duration-200 ease-out ${
         isVisible ? 'translate-y-0' : '-translate-y-full'
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
