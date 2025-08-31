@@ -78,7 +78,6 @@ export async function fetchNewsFromNewsAPI({ allInterests }: NewsRequest): Promi
         console.log(`Strategy 1: Making request with OR query...`)
         console.log(`Parameters: from=${fromDate}, sortBy=${sortBy}, page=${page}, pageSize=${pageSize}, searchIn=description`)
         console.log(`Query: ${orQuery}`)
-        console.log(`URL: ${url.replace(process.env.NEWS_API_KEY!, '[API_KEY_HIDDEN]')}`)
 
         const response = await fetch(url)
         
@@ -133,7 +132,6 @@ export async function fetchNewsFromNewsAPI({ allInterests }: NewsRequest): Promi
                      const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(interest)}&from=${fromDate}&sortBy=${sortBy}&page=${page}&pageSize=${pageSize}&language=en&excludeDomains=rlsbb.cc&apiKey=${process.env.NEWS_API_KEY}`
           
           console.log(`Strategy 2: Trying broader search for single interest "${interest}" without searchIn=description...`)
-          console.log(`URL: ${url.replace(process.env.NEWS_API_KEY!, '[API_KEY_HIDDEN]')}`)
 
           const response = await fetch(url)
           
