@@ -9,12 +9,14 @@ interface DeleteInterestButtonProps {
   totalInterests: number
 }
 
+//button for deleting an interest
 export function DeleteInterestButton({ interestId, interestName, totalInterests }: DeleteInterestButtonProps) {
   const [isDeleting, setIsDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
   const { deleteInterest } = useInterests()
 
+  //delete an interest
   const handleDelete = async () => {
     if (totalInterests <= 1) {
       setError('Cannot delete the last interest. At least one interest must remain.')

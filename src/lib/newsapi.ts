@@ -9,6 +9,7 @@ interface NewsArticle {
   url: string
 }
 
+//format of each article from the NewsAPI
 interface NewsAPIArticle {
   source: {
     id: string | null
@@ -23,12 +24,14 @@ interface NewsAPIArticle {
   content: string | null
 }
 
+//format of the response from the NewsAPI
 interface NewsAPIResponse {
   status: string
   totalResults: number
   articles: NewsAPIArticle[]
 }
 
+//fetch news based on interests
 export async function fetchNewsFromNewsAPI({ allInterests }: NewsRequest): Promise<NewsArticle[]> {
   if (!process.env.NEWS_API_KEY) {
     throw new Error('NewsAPI key is not configured')
@@ -58,23 +61,26 @@ export async function fetchNewsFromNewsAPI({ allInterests }: NewsRequest): Promi
    const strategies = [
            // Strategy 1: For multiple interests, use searchIn=description; for single interests, use searchIn=description with pageSize=25
       async () => {
+        //get random date from last 7 days for variety
         const daysBack = Math.floor(Math.random() * 7) + 1
         const dateFrom = new Date()
         dateFrom.setDate(dateFrom.getDate() - daysBack)
         const fromDate = dateFrom.toISOString().split('T')[0]
         
+        //get random sort option for variety
         const sortOptions = ['popularity', 'relevancy']
         const sortBy = sortOptions[Math.floor(Math.random() * sortOptions.length)]
         
-                 // For single interests, always use page 1; for multiple interests, try pages 1-3
+        // For single interests, always use page 1; for multiple interests, try pages 1-3
          const page = validInterests.length === 1 ? 1 : Math.floor(Math.random() * 3) + 1
         
-        // For single interests, use pageSize=25; for multiple interests, use pageSize=20
+        // For single interests, use pageSize=15; for multiple interests, use pageSize=20
         const pageSize = validInterests.length === 1 ? 15 : 20
         
-                 // Always use searchIn=description and exclude unwanted sources
-         const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(orQuery)}&searchIn=description&from=${fromDate}&sortBy=${sortBy}&page=${page}&pageSize=${pageSize}&language=en&excludeDomains=rlsbb.cc&apiKey=${process.env.NEWS_API_KEY}`
+        // Always use searchIn=description and exclude unwanted sources
+        const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(orQuery)}&searchIn=description&from=${fromDate}&sortBy=${sortBy}&page=${page}&pageSize=${pageSize}&language=en&excludeDomains=rlsbb.cc&apiKey=${process.env.NEWS_API_KEY}`
         
+        //log the request parameters
         console.log(`Strategy 1: Making request with OR query...`)
         console.log(`Parameters: from=${fromDate}, sortBy=${sortBy}, page=${page}, pageSize=${pageSize}, searchIn=description`)
         console.log(`Query: ${orQuery}`)
@@ -120,17 +126,23 @@ export async function fetchNewsFromNewsAPI({ allInterests }: NewsRequest): Promi
       async () => {
         if (validInterests.length === 1) {
           const interest = validInterests[0]
+          //get random date from last 7 days for variety
           const daysBack = Math.floor(Math.random() * 7) + 1
           const dateFrom = new Date()
           dateFrom.setDate(dateFrom.getDate() - daysBack)
           const fromDate = dateFrom.toISOString().split('T')[0]
           
-          const sortBy = 'popularity'
+
+          //get random sort option for variety
+          const sortOptions = ['popularity', 'relevancy']
+          const sortBy = sortOptions[Math.floor(Math.random() * sortOptions.length)]
+          
           const page = 1
           const pageSize = 20
           
-                     const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(interest)}&from=${fromDate}&sortBy=${sortBy}&page=${page}&pageSize=${pageSize}&language=en&excludeDomains=rlsbb.cc&apiKey=${process.env.NEWS_API_KEY}`
+          const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(interest)}&from=${fromDate}&sortBy=${sortBy}&page=${page}&pageSize=${pageSize}&language=en&excludeDomains=rlsbb.cc&apiKey=${process.env.NEWS_API_KEY}`
           
+          //log the request parameters
           console.log(`Strategy 2: Trying broader search for single interest "${interest}" without searchIn=description...`)
 
           const response = await fetch(url)
@@ -178,8 +190,6 @@ export async function fetchNewsFromNewsAPI({ allInterests }: NewsRequest): Promi
       }
     }
   }
-
-
 
   // Fallback: try a general search if no specific interest articles found
   console.log('No specific interest articles found, trying general news...')

@@ -42,6 +42,7 @@ const passwordRequirements: PasswordRequirement[] = [
   }
 ]
 
+//Form for signing up and signing in
 export function AuthForm({ onAuthSuccess }: AuthFormProps) {
   const [isSignUp, setIsSignUp] = useState(false)
   const [email, setEmail] = useState('')
@@ -171,6 +172,7 @@ export function AuthForm({ onAuthSuccess }: AuthFormProps) {
 
   return (
     <div className="w-full max-w-md mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
+      {/* Auth Form */}
       <h2 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">
         {isSignUp ? 'Create Account' : 'Sign In'}
       </h2>
@@ -293,6 +295,7 @@ export function AuthForm({ onAuthSuccess }: AuthFormProps) {
         </div>
       )}
       
+      {/* switch sign up/sign in button */}
       <div className="mt-4 text-center">
         <button
           type="button"

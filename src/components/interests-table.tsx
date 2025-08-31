@@ -3,6 +3,7 @@
 import { useInterests } from './interests-context'
 import { DeleteInterestButton } from './delete-interest-button'
 
+//table for displaying interests
 export function InterestsTable() {
   const { interests, loading, error } = useInterests()
 
@@ -31,6 +32,7 @@ export function InterestsTable() {
 
   if (!interests || interests.length === 0) {
     return (
+      //no interests found
       <div className="mt-8 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
         <h3 className="text-lg font-semibold mb-2">Interests</h3>
         <p className="text-gray-600 dark:text-gray-400">
@@ -41,6 +43,7 @@ export function InterestsTable() {
   }
 
   return (
+    //display interests
     <div className="mt-8 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
       <h3 className="text-lg font-semibold mb-4">Interests</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

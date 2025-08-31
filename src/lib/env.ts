@@ -20,6 +20,7 @@ const requiredEnvVars = [
 //   'NEXTAUTH_SECRET',
 // ] as const
 
+//make sure all required environment variables are set
 export function validateEnv() {
   const missingVars = requiredEnvVars.filter(
     (varName) => !process.env[varName]

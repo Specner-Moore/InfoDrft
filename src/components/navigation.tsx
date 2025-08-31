@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react'
 import { createClientComponentClient } from '@/lib/supabase-client'
 import { User } from '@supabase/supabase-js'
 
+//navigation bar
 export function Navigation() {
   const pathname = usePathname()
   const [isVisible, setIsVisible] = useState(true)

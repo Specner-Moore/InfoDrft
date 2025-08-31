@@ -7,6 +7,7 @@ interface SummarizeRequest {
   }[]
 }
 
+//format of the summarized article
 interface SummarizedArticle {
   title: string
   description: string
@@ -15,6 +16,7 @@ interface SummarizedArticle {
   url: string
 }
 
+//pass articles to OpenAI to summarize
 export async function summarizeArticlesWithOpenAI({ articles }: SummarizeRequest): Promise<SummarizedArticle[]> {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error('OpenAI API key is not configured')
@@ -39,6 +41,7 @@ export async function summarizeArticlesWithOpenAI({ articles }: SummarizeRequest
           continue
         }
 
+        //prompt for OpenAI to summarize the article
         const prompt = `
           Please provide a concise, engaging summary of the following news article. 
           The summary should be 5-10 sentences that capture the key points and main story.

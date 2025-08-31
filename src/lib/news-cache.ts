@@ -20,9 +20,7 @@ export interface NewsCacheEntry {
 export class NewsCache {
   private supabase = createClientComponentClient()
 
-  /**
-   * Get the next midnight timestamp for cache expiration
-   */
+  // Get the next midnight timestamp for cache expiration
   private getNextMidnight(): Date {
     const now = new Date()
     const tomorrow = new Date(now)
@@ -31,9 +29,7 @@ export class NewsCache {
     return tomorrow
   }
 
-  /**
-   * Check if cached news exists and is still valid
-   */
+  // Check if cached news exists and is still valid
   async getCachedNews(userId: string, interests: string[]): Promise<CachedNewsArticle[] | null> {
     try {
       // Sort interests to ensure consistent cache key
@@ -67,9 +63,7 @@ export class NewsCache {
     }
   }
 
-  /**
-   * Store news articles in cache
-   */
+  // Store news articles in cache
   async cacheNews(userId: string, interests: string[], articles: CachedNewsArticle[]): Promise<void> {
     try {
       // Sort interests to ensure consistent cache key
@@ -99,9 +93,7 @@ export class NewsCache {
     }
   }
 
-  /**
-   * Clear expired cache entries
-   */
+  // Clear expired cache entries
   async clearExpiredCache(): Promise<void> {
     try {
       const { error } = await this.supabase
@@ -117,9 +109,7 @@ export class NewsCache {
     }
   }
 
-  /**
-   * Force refresh cache by deleting existing entry
-   */
+  // Force refresh cache by deleting existing entry
   async forceRefresh(userId: string, interests: string[]): Promise<void> {
     try {
       const sortedInterests = [...interests].sort()
