@@ -20,6 +20,10 @@ export async function GET() {
     console.log('NEWS_API_KEY:', process.env.NEWS_API_KEY ? 'SET' : 'MISSING')
     console.log('OPENAI_API_KEY:', process.env.OPENAI_API_KEY ? 'SET' : 'MISSING')
     
+    // More detailed logging
+    console.log('All process.env keys:', Object.keys(process.env).filter(key => key.includes('SUPABASE')))
+    console.log('SUPABASE_SERVICE_ROLE_KEY value length:', process.env.SUPABASE_SERVICE_ROLE_KEY?.length || 0)
+    
     // Validate environment variables
     const env = validateEnv()
     
