@@ -1,4 +1,13 @@
 /** @type {import('next').NextConfig} */
+
+// Temporary logging to see environment variables in production
+console.log('=== ENVIRONMENT VARIABLES DEBUG ===')
+console.log('NODE_ENV:', process.env.NODE_ENV)
+console.log('All process.env keys:', Object.keys(process.env))
+console.log('SUPABASE_SERVICE_ROLE_KEY exists:', !!process.env.SUPABASE_SERVICE_ROLE_KEY)
+console.log('SUPABASE_SERVICE_ROLE_KEY length:', process.env.SUPABASE_SERVICE_ROLE_KEY?.length || 0)
+console.log('=== END ENVIRONMENT VARIABLES DEBUG ===')
+
 const nextConfig = {
   images: {
     domains: ['localhost'],

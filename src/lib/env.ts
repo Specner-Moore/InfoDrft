@@ -1,6 +1,8 @@
 const requiredEnvVars = [
   'NEXT_PUBLIC_SUPABASE_URL',
   'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+  'NEWS_API_KEY',
+  'OPENAI_API_KEY',
 ] as const
 
 // Optional environment variables for reference
@@ -33,7 +35,7 @@ export function validateEnv() {
     supabase: {
       url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
       anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+      serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || null,
     },
     nextauth: {
       url: process.env.NEXTAUTH_URL,

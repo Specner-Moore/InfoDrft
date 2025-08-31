@@ -2,9 +2,70 @@ import { NextRequest } from 'next/server'
 import { fetchNewsFromNewsAPI } from '@/lib/newsapi'
 import { summarizeArticlesWithOpenAI } from '@/lib/openai'
 import { NewsCacheServer } from '@/lib/news-cache-server'
+import { validateEnv } from '@/lib/env'
 
 // Force dynamic rendering since this route uses request.url
 export const dynamic = 'force-dynamic'
+
+// Increase timeout for streaming operations
+export const maxDuration = 30
+
+export async function GET() {
+  try {
+    // Debug logging to see what environment variables are available
+    console.log('Debug - Environment variables check:')
+    console.log('NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'MISSING')
+    console.log('NEXT_PUBLIC_SUPABASE_ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'SET' : 'MISSING')
+    console.log('SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SET' : 'MISSING')
+    console.log('NEWS_API_KEY:', process.env.NEWS_API_KEY ? 'SET' : 'MISSING')
+    console.log('OPENAI_API_KEY:', process.env.OPENAI_API_KEY ? 'SET' : 'MISSING')
+    
+    // More detailed logging
+    console.log('All process.env keys:', Object.keys(process.env).filter(key => key.includes('SUPABASE')))
+    console.log('SUPABASE_SERVICE_ROLE_KEY value length:', process.env.SUPABASE_SERVICE_ROLE_KEY?.length || 0)
+    
+    // Validate environment variables
+    console.log('About to call validateEnv() in GET method')
+    const env = validateEnv()
+    console.log('validateEnv() succeeded in GET method')
+    
+    // Test basic environment configuration
+    let supabaseStatus = 'unknown'
+    try {
+      if (env.supabase.url && env.supabase.serviceRoleKey) {
+        supabaseStatus = 'configured'
+      } else {
+        supabaseStatus = 'missing'
+      }
+    } catch (error) {
+      supabaseStatus = 'error'
+      console.error('Supabase configuration check failed:', error)
+    }
+
+    return new Response(
+      JSON.stringify({
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        environment: {
+          newsApi: env.newsapi.apiKey ? 'configured' : 'missing',
+          openai: env.openai.apiKey ? 'configured' : 'missing',
+          supabase: supabaseStatus
+        }
+      }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    )
+  } catch (error) {
+    console.error('Health check failed:', error)
+    return new Response(
+      JSON.stringify({
+        status: 'error',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    )
+  }
+}
 
 export async function POST(request: NextRequest) {
   const encoder = new TextEncoder()
@@ -29,55 +90,85 @@ export async function POST(request: NextRequest) {
 
     console.log('Received POST request for interests:', interests, 'forceRefresh:', forceRefresh)
 
-    // Check API keys
-    if (!process.env.NEWS_API_KEY || !process.env.OPENAI_API_KEY) {
+    // Validate environment variables
+    try {
+      console.log('About to call validateEnv() in POST method')
+      const env = validateEnv()
+      console.log('validateEnv() succeeded in POST method')
+      if (!env.newsapi.apiKey || !env.openai.apiKey) {
+        return new Response(
+          JSON.stringify({ error: 'API keys not configured' }),
+          { status: 500, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
+    } catch (envError) {
+      console.error('Environment validation failed in POST method:', envError)
       return new Response(
-        JSON.stringify({ error: 'API keys not configured' }),
+        JSON.stringify({ error: envError instanceof Error ? envError.message : 'Server configuration error' }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       )
     }
 
-    // Initialize cache
-    const newsCache = new NewsCacheServer()
+    // Initialize cache with error handling
+    let newsCache: NewsCacheServer
+    try {
+      newsCache = new NewsCacheServer()
+    } catch (cacheError) {
+      console.error('Failed to initialize cache:', cacheError)
+      return new Response(
+        JSON.stringify({ error: 'Cache initialization failed' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
     
     // Check cache first (unless force refresh is requested)
     if (!forceRefresh) {
-      console.log('🔍 Checking cache for user:', userId, 'forceRefresh:', forceRefresh)
-      const cachedArticles = await newsCache.getCachedNews(userId, interests)
-      if (cachedArticles && cachedArticles.length > 0) {
-        console.log('✅ Returning cached articles:', cachedArticles.length)
-        
-        // Return cached articles immediately
-        const stream = new ReadableStream({
-          start(controller) {
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({
-              type: 'cached',
-              articles: cachedArticles
-            })}\n\n`))
-            
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({
-              type: 'complete',
-              totalArticles: cachedArticles.length,
-              cached: true
-            })}\n\n`))
-            
-            controller.close()
-          }
-        })
+      try {
+        console.log('🔍 Checking cache for user:', userId, 'forceRefresh:', forceRefresh)
+        const cachedArticles = await newsCache.getCachedNews(userId, interests)
+        if (cachedArticles && cachedArticles.length > 0) {
+          console.log('✅ Returning cached articles:', cachedArticles.length)
+          
+          // Return cached articles immediately
+          const stream = new ReadableStream({
+            start(controller) {
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+                type: 'cached',
+                articles: cachedArticles
+              })}\n\n`))
+              
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+                type: 'complete',
+                totalArticles: cachedArticles.length,
+                cached: true
+              })}\n\n`))
+              
+              controller.close()
+            }
+          })
 
-        return new Response(stream, {
-          headers: {
-            'Content-Type': 'text/event-stream',
-            'Cache-Control': 'no-cache',
-            'Connection': 'keep-alive',
-          },
-        })
+          return new Response(stream, {
+            headers: {
+              'Content-Type': 'text/event-stream',
+              'Cache-Control': 'no-cache',
+              'Connection': 'keep-alive',
+            },
+          })
+        }
+      } catch (cacheError) {
+        console.error('Cache check failed, continuing with fresh fetch:', cacheError)
+        // Continue without cache if it fails
       }
     }
 
     // If force refresh or no cache, clear existing cache entry
     if (forceRefresh) {
-      await newsCache.forceRefresh(userId, interests)
+      try {
+        await newsCache.forceRefresh(userId, interests)
+      } catch (refreshError) {
+        console.error('Force refresh failed:', refreshError)
+        // Continue anyway
+      }
     }
 
     // Create a readable stream for new articles
@@ -134,8 +225,13 @@ export async function POST(request: NextRequest) {
           
           if (!controllerClosed) {
             // Cache all articles
-            console.log('💾 Caching all articles:', results.length)
-            await newsCache.cacheNews(userId, interests, results)
+            try {
+              console.log('💾 Caching all articles:', results.length)
+              await newsCache.cacheNews(userId, interests, results)
+            } catch (cacheError) {
+              console.error('Failed to cache articles:', cacheError)
+              // Continue without caching
+            }
 
             // Send completion signal
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({
