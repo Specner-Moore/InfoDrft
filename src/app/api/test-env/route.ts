@@ -3,18 +3,7 @@ import { validateEnv } from '@/lib/env'
 
 export async function GET() {
   try {
-    console.log('=== TEST ENV DEBUG ===')
-    console.log('About to call validateEnv()')
-    
     const env = validateEnv()
-    
-    console.log('validateEnv() succeeded')
-    console.log('Environment variables status:')
-    console.log('NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'MISSING')
-    console.log('NEXT_PUBLIC_SUPABASE_ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'SET' : 'MISSING')
-    console.log('SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SET' : 'MISSING')
-    console.log('NEWS_API_KEY:', process.env.NEWS_API_KEY ? 'SET' : 'MISSING')
-    console.log('OPENAI_API_KEY:', process.env.OPENAI_API_KEY ? 'SET' : 'MISSING')
     
     return NextResponse.json({
       status: 'success',

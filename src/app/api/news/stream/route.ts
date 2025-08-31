@@ -12,22 +12,8 @@ export const maxDuration = 30
 
 export async function GET() {
   try {
-    // Debug logging to see what environment variables are available
-    console.log('Debug - Environment variables check:')
-    console.log('NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'MISSING')
-    console.log('NEXT_PUBLIC_SUPABASE_ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'SET' : 'MISSING')
-    console.log('SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SET' : 'MISSING')
-    console.log('NEWS_API_KEY:', process.env.NEWS_API_KEY ? 'SET' : 'MISSING')
-    console.log('OPENAI_API_KEY:', process.env.OPENAI_API_KEY ? 'SET' : 'MISSING')
-    
-    // More detailed logging
-    console.log('All process.env keys:', Object.keys(process.env).filter(key => key.includes('SUPABASE')))
-    console.log('SUPABASE_SERVICE_ROLE_KEY value length:', process.env.SUPABASE_SERVICE_ROLE_KEY?.length || 0)
-    
     // Validate environment variables
-    console.log('About to call validateEnv() in GET method')
     const env = validateEnv()
-    console.log('validateEnv() succeeded in GET method')
     
     // Test basic environment configuration
     let supabaseStatus = 'unknown'
@@ -92,9 +78,7 @@ export async function POST(request: NextRequest) {
 
     // Validate environment variables
     try {
-      console.log('About to call validateEnv() in POST method')
       const env = validateEnv()
-      console.log('validateEnv() succeeded in POST method')
       if (!env.newsapi.apiKey || !env.openai.apiKey) {
         return new Response(
           JSON.stringify({ error: 'API keys not configured' }),
@@ -102,9 +86,9 @@ export async function POST(request: NextRequest) {
         )
       }
     } catch (envError) {
-      console.error('Environment validation failed in POST method:', envError)
+      console.error('Environment validation failed:', envError)
       return new Response(
-        JSON.stringify({ error: envError instanceof Error ? envError.message : 'Server configuration error' }),
+        JSON.stringify({ error: 'Server configuration error' }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       )
     }

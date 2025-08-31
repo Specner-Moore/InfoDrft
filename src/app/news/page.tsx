@@ -324,23 +324,22 @@ export default function NewsPage() {
           </div>
 
           {/* Get More Articles Section */}
-          {availableInterests.length > 0 && (
+          {availableInterests.length > 0 && !isLoading && (
             <div className="mt-12">
               <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6 text-center">
                 Get More Articles
               </h2>
-                                <p className="text-gray-600 dark:text-gray-400 mb-6 text-center">
-                    Click on an interest below to get fresh articles focused on that topic, or choose &ldquo;All Interests&rdquo; for a broader selection. This will refresh the cache with new articles.
-                  </p>
+              <p className="text-gray-600 dark:text-gray-400 mb-6 text-center">
+                Click on an interest below to get fresh articles focused on that topic, or choose &ldquo;All Interests&rdquo; for a broader selection. This will refresh the cache with new articles.
+              </p>
               
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
                 {/* All Interests Button */}
                 <button
                   onClick={() => handleGetMoreNews(availableInterests.map(interest => interest.name))}
-                  disabled={isLoading}
-                  className="p-4 rounded-lg border-2 border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                  className="p-4 rounded-lg border-2 border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors font-medium"
                 >
-                  {isLoading ? 'Loading...' : 'All Interests'}
+                  All Interests
                 </button>
                 
                 {/* Individual Interest Buttons */}
@@ -348,21 +347,12 @@ export default function NewsPage() {
                   <button
                     key={interest.id}
                     onClick={() => handleGetMoreNews([interest.name])}
-                    disabled={isLoading}
-                    className="p-4 rounded-lg border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    className="p-4 rounded-lg border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors font-medium"
                   >
-                    {isLoading ? 'Loading...' : interest.name}
+                    {interest.name}
                   </button>
                 ))}
               </div>
-              
-              {isLoading && (
-                <div className="text-center">
-                  <p className="text-gray-600 dark:text-gray-400">
-                    Fetching new articles...
-                  </p>
-                </div>
-              )}
             </div>
           )}
         </div>
