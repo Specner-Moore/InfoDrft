@@ -1,6 +1,9 @@
 const requiredEnvVars = [
   'NEXT_PUBLIC_SUPABASE_URL',
   'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+  'SUPABASE_SERVICE_ROLE_KEY',
+  'NEWS_API_KEY',
+  'OPENAI_API_KEY',
 ] as const
 
 // Optional environment variables for reference

@@ -14,21 +14,11 @@ export async function GET() {
   try {
     // Validate environment variables
     const env = validateEnv()
-    if (!env.newsapi.apiKey || !env.openai.apiKey) {
-      return new Response(
-        JSON.stringify({ 
-          status: 'error', 
-          message: 'API keys not configured',
-          timestamp: new Date().toISOString()
-        }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
-      )
-    }
-
+    
     // Test basic environment configuration
     let supabaseStatus = 'unknown'
     try {
-      if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      if (env.supabase.url && env.supabase.serviceRoleKey) {
         supabaseStatus = 'configured'
       } else {
         supabaseStatus = 'missing'
