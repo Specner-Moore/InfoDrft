@@ -80,7 +80,9 @@ export async function fetchNewsFromNewsAPI({ allInterests }: NewsRequest): Promi
         console.log(`Query: ${orQuery}`)
         console.log(`URL: ${url.replace(process.env.NEWS_API_KEY!, '[API_KEY_HIDDEN]')}`)
 
-        const response = await fetch(url)
+        const response = await fetch(url, {
+          signal: AbortSignal.timeout(15000) // 15 second timeout
+        })
         
         if (!response.ok) {
           const errorText = await response.text()
@@ -135,7 +137,9 @@ export async function fetchNewsFromNewsAPI({ allInterests }: NewsRequest): Promi
           console.log(`Strategy 2: Trying broader search for single interest "${interest}" without searchIn=description...`)
           console.log(`URL: ${url.replace(process.env.NEWS_API_KEY!, '[API_KEY_HIDDEN]')}`)
 
-          const response = await fetch(url)
+          const response = await fetch(url, {
+            signal: AbortSignal.timeout(15000) // 15 second timeout
+          })
           
           if (!response.ok) {
             throw new Error(`NewsAPI request failed: ${response.status}`)
@@ -181,8 +185,6 @@ export async function fetchNewsFromNewsAPI({ allInterests }: NewsRequest): Promi
     }
   }
 
-
-
   // Fallback: try a general search if no specific interest articles found
   console.log('No specific interest articles found, trying general news...')
   try {
@@ -193,7 +195,9 @@ export async function fetchNewsFromNewsAPI({ allInterests }: NewsRequest): Promi
     
     const url = `https://newsapi.org/v2/everything?q=news&from=${fromDate}&sortBy=popularity&page=1&pageSize=10&language=en&apiKey=${process.env.NEWS_API_KEY}`
     
-    const response = await fetch(url)
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(15000) // 15 second timeout
+    })
     const data = await response.json() as NewsAPIResponse
     
     if (data.status === 'ok' && data.articles && data.articles.length > 0) {

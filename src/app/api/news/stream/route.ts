@@ -2,9 +2,67 @@ import { NextRequest } from 'next/server'
 import { fetchNewsFromNewsAPI } from '@/lib/newsapi'
 import { summarizeArticlesWithOpenAI } from '@/lib/openai'
 import { NewsCacheServer } from '@/lib/news-cache-server'
+import { validateEnv } from '@/lib/env'
+import { errorLogger } from '@/lib/error-logger'
 
 // Force dynamic rendering since this route uses request.url
 export const dynamic = 'force-dynamic'
+
+// Increase timeout for streaming operations
+export const maxDuration = 30
+
+export async function GET() {
+  try {
+    // Validate environment variables
+    const env = validateEnv()
+    if (!env.newsapi.apiKey || !env.openai.apiKey) {
+      return new Response(
+        JSON.stringify({ 
+          status: 'error', 
+          message: 'API keys not configured',
+          timestamp: new Date().toISOString()
+        }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Test basic environment configuration
+    let supabaseStatus = 'unknown'
+    try {
+      if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        supabaseStatus = 'configured'
+      } else {
+        supabaseStatus = 'missing'
+      }
+    } catch (error) {
+      supabaseStatus = 'error'
+      errorLogger.error('Supabase configuration check failed', error as Error)
+    }
+
+    return new Response(
+      JSON.stringify({
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        environment: {
+          newsApi: env.newsapi.apiKey ? 'configured' : 'missing',
+          openai: env.openai.apiKey ? 'configured' : 'missing',
+          supabase: supabaseStatus
+        }
+      }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    )
+  } catch (error) {
+    errorLogger.error('Health check failed', error as Error)
+    return new Response(
+      JSON.stringify({
+        status: 'error',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    )
+  }
+}
 
 export async function POST(request: NextRequest) {
   const encoder = new TextEncoder()
@@ -176,6 +234,7 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('Error in streaming API:', error)
+    errorLogger.error('Streaming API failed', error as Error)
     return new Response(
       JSON.stringify({ error: 'Failed to start streaming' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
