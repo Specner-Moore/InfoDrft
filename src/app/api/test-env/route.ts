@@ -1,5 +1,3 @@
-import { NextRequest } from 'next/server'
-
 export async function GET() {
   try {
     // Simple environment variable check
