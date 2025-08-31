@@ -6,24 +6,14 @@ export const createServerSupabaseClient = () => {
     throw new Error('Supabase environment variables are not configured for server-side usage')
   }
   
-  const client = createClient(
+  return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.SUPABASE_SERVICE_ROLE_KEY,
     {
       auth: {
         autoRefreshToken: false,
         persistSession: false
-      },
-      db: {
-        schema: 'public'
-      },
-      global: {
-        headers: {
-          'x-application-name': 'infodrft-news-api'
-        }
       }
     }
   )
-
-  return client
 }
