@@ -200,63 +200,63 @@ export default function NewsPage() {
     <div className="flex min-h-screen flex-col items-center justify-center p-8">
       <div className="max-w-4xl mx-auto w-full">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 border border-gray-200 dark:border-gray-700">
-                     {/* Error Display */}
-           {error && (
-             <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg dark:bg-red-900/20 dark:border-red-800">
-               <h3 className="text-lg font-semibold text-red-800 dark:text-red-200 mb-2">
-                 Unable to Generate News
-               </h3>
-               <p className="text-red-600 dark:text-red-300 mb-3">
-                 {error.includes('NewsAPI key') 
-                   ? 'NewsAPI key is not configured. Please check your environment settings.'
-                   : error.includes('OpenAI API key')
-                   ? 'OpenAI API key is not configured. Please check your environment settings.'
-                   : error.includes('401 Unauthorized')
-                   ? 'API key is invalid or expired. Please check your API keys in the environment settings.'
-                   : error.includes('Failed to fetch')
-                   ? 'Unable to connect to the news service. Please try again later.'
-                                 : error.includes('No interests available')
-              ? 'No interests found. Please add some interests on the interests page first.'
-                   : error
-                 }
-               </p>
-               {(error.includes('NewsAPI') || error.includes('OpenAI')) && (
-                 <div className="text-sm text-red-500 dark:text-red-400">
-                   <p className="font-medium">To fix this:</p>
-                   <ul className="list-disc list-inside mt-1 space-y-1">
-                     {error.includes('NewsAPI') && (
-                       <>
-                         <li>Get your NewsAPI key from <a href="https://newsapi.org" target="_blank" rel="noopener noreferrer" className="underline hover:text-red-700">NewsAPI.org</a></li>
-                         <li>Add it to your .env.local file as NEWS_API_KEY=your_key_here</li>
-                       </>
-                     )}
-                     {error.includes('OpenAI') && (
-                       <>
-                         <li>Get your OpenAI API key from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="underline hover:text-red-700">OpenAI Platform</a></li>
-                         <li>Add it to your .env.local file as OPENAI_API_KEY=your_key_here</li>
-                       </>
-                     )}
-                     <li>Restart the development server</li>
-                   </ul>
-                 </div>
-               )}
-             </div>
-           )}
+          {/* Error Display */}
+          {error && (
+            <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg dark:bg-red-900/20 dark:border-red-800">
+              <h3 className="text-lg font-semibold text-red-800 dark:text-red-200 mb-2">
+                Unable to Generate News
+              </h3>
+              <p className="text-red-600 dark:text-red-300 mb-3">
+                {error.includes('NewsAPI key') 
+                  ? 'NewsAPI key is not configured. Please check your environment settings.'
+                  : error.includes('OpenAI API key')
+                  ? 'OpenAI API key is not configured. Please check your environment settings.'
+                  : error.includes('401 Unauthorized')
+                  ? 'API key is invalid or expired. Please check your API keys in the environment settings.'
+                  : error.includes('Failed to fetch')
+                  ? 'Unable to connect to the news service. Please try again later.'
+                  : error.includes('No interests available')
+                  ? 'No interests found. Please add some interests on the interests page first.'
+                  : error
+                }
+              </p>
+              {(error.includes('NewsAPI') || error.includes('OpenAI')) && (
+                <div className="text-sm text-red-500 dark:text-red-400">
+                  <p className="font-medium">To fix this:</p>
+                  <ul className="list-disc list-inside mt-1 space-y-1">
+                    {error.includes('NewsAPI') && (
+                      <>
+                        <li>Get your NewsAPI key from <a href="https://newsapi.org" target="_blank" rel="noopener noreferrer" className="underline hover:text-red-700">NewsAPI.org</a></li>
+                        <li>Add it to your .env.local file as NEWS_API_KEY=your_key_here</li>
+                      </>
+                    )}
+                    {error.includes('OpenAI') && (
+                      <>
+                        <li>Get your OpenAI API key from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="underline hover:text-red-700">OpenAI Platform</a></li>
+                        <li>Add it to your .env.local file as OPENAI_API_KEY=your_key_here</li>
+                      </>
+                    )}
+                    <li>Restart the development server</li>
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
 
-                     {/* News Results Section */}
-           <div>
-             <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
-               News Based on Your Interests
-             </h2>
-             
-             {/* Cache Status Indicator */}
-             {isCached && (
-               <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
-                 <p className="text-sm text-blue-700 dark:text-blue-300">
-                   📋 Showing cached articles from today. Click "Get More Articles" below to refresh.
-                 </p>
-               </div>
-             )}
+          {/* News Results Section */}
+          <div>
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
+              News Based on Your Interests
+            </h2>
+            
+            {/* Cache Status Indicator */}
+            {isCached && (
+              <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  📋 Showing cached articles from today. Click &quot;Get More Articles&quot; below to refresh.
+                </p>
+              </div>
+            )}
             
             {isLoading ? (
               <div className="space-y-6">
@@ -304,7 +304,7 @@ export default function NewsPage() {
                   </button>
                 ))}
                 
-                {/* Loading indicator for second batch */}
+                {/* Loading indicator for remaining articles */}
                 {isLoadingMore && (
                   <div className="text-center py-4">
                     <div className="inline-flex items-center px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg">
@@ -314,13 +314,13 @@ export default function NewsPage() {
                   </div>
                 )}
               </div>
-                         ) : (
-                                <div className="text-center py-8">
-                   <p className="text-gray-600 dark:text-gray-400">
-                     Loading news based on your interests...
-                   </p>
-                 </div>
-             )}
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-600 dark:text-gray-400">
+                  Loading news based on your interests...
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Get More Articles Section */}
@@ -329,9 +329,9 @@ export default function NewsPage() {
               <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6 text-center">
                 Get More Articles
               </h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-6 text-center">
-                Click on an interest below to get fresh articles focused on that topic, or choose "All Interests" for a broader selection. This will refresh the cache with new articles.
-              </p>
+                                <p className="text-gray-600 dark:text-gray-400 mb-6 text-center">
+                    Click on an interest below to get fresh articles focused on that topic, or choose &ldquo;All Interests&rdquo; for a broader selection. This will refresh the cache with new articles.
+                  </p>
               
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
                 {/* All Interests Button */}

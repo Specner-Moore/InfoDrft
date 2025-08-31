@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
 import { createClientComponentClient } from '@/lib/supabase-client'
 
 interface Interest {
@@ -40,7 +40,7 @@ export function InterestsProvider({ children }: InterestsProviderProps) {
   
   const supabase = createClientComponentClient()
 
-  const fetchInterests = async () => {
+  const fetchInterests = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -73,7 +73,7 @@ export function InterestsProvider({ children }: InterestsProviderProps) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase])
 
   const addInterest = async (name: string): Promise<{ success: boolean; error?: string }> => {
     try {
@@ -149,7 +149,7 @@ export function InterestsProvider({ children }: InterestsProviderProps) {
   // Initial fetch on mount
   useEffect(() => {
     fetchInterests()
-  }, [supabase])
+  }, [fetchInterests])
 
   const value: InterestsContextType = {
     interests,

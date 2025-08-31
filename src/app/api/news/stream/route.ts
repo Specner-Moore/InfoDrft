@@ -92,7 +92,6 @@ export async function POST(request: NextRequest) {
           console.log(`Streaming: ${articles.length} articles individually`)
 
           // Process articles individually and stream them as they're ready
-          const allSummarizedArticles: any[] = []
           let articlesSent = 0
 
           // Process articles in parallel but send them as they complete
