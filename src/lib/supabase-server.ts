@@ -10,7 +10,8 @@ export const createServerSupabaseClient = () => {
   }
   
   if (!serviceRoleKey) {
-    throw new Error('SUPABASE_SERVICE_ROLE_KEY environment variable is not configured')
+    console.warn('SUPABASE_SERVICE_ROLE_KEY not available, falling back to anon key')
+    return createServerSupabaseClientWithAnonKey()
   }
   
   return createClient(

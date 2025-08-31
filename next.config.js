@@ -15,7 +15,6 @@ const nextConfig = {
   },
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
-    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
   },
   webpack: (config, { dev, isServer }) => {
     // Optimize webpack cache for better performance
