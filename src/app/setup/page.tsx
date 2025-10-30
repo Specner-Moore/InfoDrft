@@ -97,7 +97,7 @@ function SetupContent() {
       // Redirect to main page after a short delay
       setTimeout(() => {
         router.push('/')
-      }, 1500)
+      }, 3000)
 
     } catch (error) {
       setMessage({ 
